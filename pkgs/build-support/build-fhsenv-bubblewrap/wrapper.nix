@@ -1,7 +1,6 @@
 {
   lib,
   stdenv,
-  callPackage,
   runCommandLocal,
   writeShellScript,
   glibc,
@@ -10,6 +9,8 @@
   coreutils,
   bubblewrap,
 }:
+
+fhsenv:
 
 {
   runScript ? "bash",
@@ -42,8 +43,6 @@ let
     splitString
     ;
 
-  inherit (lib.attrsets) removeAttrs;
-
   # The splicing code does not handle `pkgsi686Linux` well, so we have to be
   # explicit about which package set it's coming from.
   inherit (pkgsHostTarget) pkgsi686Linux;
@@ -59,27 +58,6 @@ let
       "version"
     ]
   ) args;
-
-  buildFHSEnv = callPackage ./buildFHSEnv.nix { };
-
-  fhsenv = buildFHSEnv (
-    removeAttrs args [
-      "runScript"
-      "extraInstallCommands"
-      "meta"
-      "passthru"
-      "extraPreBwrapCmds"
-      "extraBwrapArgs"
-      "dieWithParent"
-      "unshareUser"
-      "unshareCgroup"
-      "unshareUts"
-      "unshareNet"
-      "unsharePid"
-      "unshareIpc"
-      "privateTmp"
-    ]
-  );
 
   etcBindEntries =
     let
