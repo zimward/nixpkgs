@@ -43,6 +43,14 @@ rustPlatform.buildRustPackage (finalAttrs: {
   #check build fails
   doCheck = false;
 
+  passthru.tests = {
+  };
+
+  passthru.services.default = {
+    imports = [ (lib.modules.importApply ./service.nix) ];
+    autopush-rs.package = finalAttrs.finalPackage;
+  };
+
   meta = {
     description = "Mozilla Push server and Push Endpoint";
     homepage = "https://mozilla-services.github.io/autopush-rs/index.html";
