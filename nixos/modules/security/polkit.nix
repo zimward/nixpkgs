@@ -13,6 +13,7 @@ let
     mkPackageOption
     mkRemovedOptionModule
     types
+    concatLines
     ;
 
   cfg = config.security.polkit;
@@ -27,6 +28,8 @@ in
     enable = mkEnableOption "polkit";
 
     enablePkexecWrapper = mkEnableOption "the setuid pkexec wrapper";
+
+    enablePersistentAuth = mkEnableOption "";
 
     package = mkPackageOption pkgs "polkit" { };
 
@@ -146,13 +149,14 @@ in
     environment.pathsToLink = [ "/share/polkit-1" ];
 
     # PolKit rules for NixOS.
-    environment.etc."polkit-1/rules.d/10-nixos.rules".text = ''
-      polkit.addAdminRule(function(action, subject) {
-        return [${lib.concatStringsSep ", " (map (i: "\"${i}\"") cfg.adminIdentities)}];
-      });
-
-      ${cfg.extraConfig}
-    ''; # TODO: validation on compilation (at least against typos)
+    environment.etc."polkit-1/rules.d/10-nixos.rules".text = concatLines [
+      ''
+        polkit.addAdminRule(function(action, subject) {
+          return [${lib.concatStringsSep ", " (map (i: "\"${i}\"") cfg.adminIdentities)}];
+        });
+      ''
+      cfg.extraConfig
+    ]; # TODO: validation on compilation (at least against typos)
 
     security.pam.services.polkit-1 = { };
 
